@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-base text-text-primary;
+  }
+  ::selection {
+    @apply bg-brass/30 text-text-primary;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-signal;
+  }
+}
+
+@layer utilities {
+  .scrollbar-factory::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-factory::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-factory::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

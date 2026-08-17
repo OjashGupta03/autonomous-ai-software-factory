@@ -1,0 +1,53 @@
+# Pinned versions reflect what was current as of this project's authoring
+# and could not be verified against a live PyPI index in the environment
+# that generated this repo (no network access there - see
+# docs/20-local-development.md). Before first install, consider running
+# `pip list --outdated` after `pip install -r requirements.txt` once, or
+# loosen pins with `pip install -U <package>` for the fast-moving ones
+# (langchain*, langgraph) which release frequently. Everything below is a
+# floor that is known to work together conceptually, not a guarantee of
+# the latest release.
+
+# --- Web framework ---------------------------------------------------
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# --- Data / validation -------------------------------------------------
+pydantic==2.10.4
+pydantic-settings==2.7.1
+email-validator==2.2.0
+
+# --- Database -----------------------------------------------------------
+sqlalchemy==2.0.36
+alembic==1.14.0
+asyncpg==0.30.0
+
+# --- Redis / worker ----------------------------------------------------
+redis==5.2.1
+arq==0.26.3
+
+# --- Agent orchestration -------------------------------------------------
+langchain==0.3.14
+langchain-core==0.3.29
+langchain-openai==0.2.14
+langchain-anthropic==0.3.1
+langgraph==0.2.62
+
+# --- Sandbox --------------------------------------------------------------
+docker==7.1.0
+
+# --- Auth -----------------------------------------------------------------
+pyjwt==2.10.1
+passlib[bcrypt]==1.7.4
+
+# --- Observability --------------------------------------------------------
+structlog==24.4.0
+
+# --- Token counting (optional; falls back to a heuristic if unavailable
+# or if its BPE tables can't be downloaded - see app/orchestrator/context_manager.py) ---
+tiktoken==0.8.0
+
+# Dev/test-only tooling (pytest, httpx, black, ruff, aiosqlite) lives in
+# requirements-dev.txt, layered on top of this file, so production images
+# built from just this file stay smaller and don't ship test tooling.

@@ -1,0 +1,8 @@
+-r requirements.txt
+
+pytest==8.3.4
+pytest-asyncio==0.25.1
+httpx==0.28.1            # FastAPI TestClient's transport
+aiosqlite==0.20.0        # in-memory SQLite for tests, see backend/tests/conftest.py
+black==24.10.0
+ruff==0.8.6

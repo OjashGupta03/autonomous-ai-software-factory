@@ -1,0 +1,93 @@
+# See docs/20-local-development.md for the full walkthrough.
+#
+# Services:
+#   postgres  - primary datastore
+#   redis     - ARQ queue, pub/sub event fan-out, LLM response cache
+#   backend   - FastAPI app (uvicorn)
+#   worker    - ARQ worker process (same image as backend, different command)
+#   frontend  - Vite dev server in development; nginx + built assets in prod
+#
+# NOT a service here: the sandbox execution image (docker/sandbox.Dockerfile).
+# It is built once and launched on demand by the backend/worker via the
+# Docker SDK, not run continuously - see docs/11-code-execution-sandbox.md.
+# The backend/worker containers are given access to the host's Docker
+# socket for exactly this purpose (see the `docker.sock` mount below).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: factory
+      POSTGRES_PASSWORD: factory
+      POSTGRES_DB: factory
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U factory"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://factory:factory@postgres:5432/factory
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /var/run/docker.sock:/var/run/docker.sock  # sandbox execution needs to launch sibling containers
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://factory:factory@postgres:5432/factory
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./backend:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: arq app.workers.tasks.WorkerSettings
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

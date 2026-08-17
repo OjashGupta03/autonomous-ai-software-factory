@@ -1,0 +1,9 @@
+{
+  "_comment": "Illustrative $/1K-token prices for local cost estimates ONLY. These are example figures, not a live price feed - verify against your provider's current pricing page before trusting the dollar figures in the analytics UI. Edit freely; the app re-reads this file at process start (see app/orchestrator/pricing.py).",
+  "gpt-4o-mini": { "input_per_1k": 0.00015, "output_per_1k": 0.0006, "provider": "openai" },
+  "gpt-4o": { "input_per_1k": 0.0025, "output_per_1k": 0.01, "provider": "openai" },
+  "claude-haiku-4-5-20251001": { "input_per_1k": 0.001, "output_per_1k": 0.005, "provider": "anthropic" },
+  "claude-sonnet-5": { "input_per_1k": 0.003, "output_per_1k": 0.015, "provider": "anthropic" },
+  "claude-opus-4-8": { "input_per_1k": 0.015, "output_per_1k": 0.075, "provider": "anthropic" },
+  "stub-model": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "stub" }
+}
