@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { AppShell } from "@/components/Layout/AppShell";
@@ -14,6 +15,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const isInitialized = useAuthStore((s) => s.isInitialized);
+  const checkSession = useAuthStore((s) => s.checkSession);
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
+
+  if (!isInitialized) {
+    return <div className="h-screen w-screen flex items-center justify-center text-text-tertiary">Loading...</div>;
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

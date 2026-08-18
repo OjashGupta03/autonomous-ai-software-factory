@@ -40,7 +40,7 @@ async def execute_task(db: AsyncSession, redis: Redis | None, settings: Settings
         if task.assigned_agent_type is None:
             await _execute_deterministic_task(db, task)
         else:
-            routing = model_router.route_task(task.task_type, task.attempt_count)
+            routing = model_router.route_task(task)
             model_name, provider = resolve_model_for_tier(routing.tier, settings)
             llm_client = build_llm_client(routing, settings, model_name, provider)
             
@@ -59,7 +59,7 @@ async def execute_task(db: AsyncSession, redis: Redis | None, settings: Settings
             agent_result = await agent.run(task.description)
             
             agent_run.status = "completed"
-            agent_run.finished_at = dt.datetime.utcnow()
+            agent_run.finished_at = dt.datetime.now(dt.timezone.utc)
             agent_run.tokens_input = agent_result.usage.input_tokens
             agent_run.tokens_output = agent_result.usage.output_tokens
             
@@ -75,11 +75,11 @@ async def execute_task(db: AsyncSession, redis: Redis | None, settings: Settings
             )
             
             task.status = TaskStatus.COMPLETED
-            task.completed_at = dt.datetime.utcnow()
+            task.completed_at = dt.datetime.now(dt.timezone.utc)
 
     except Exception as e:
         task.status = TaskStatus.FAILED
-        task.completed_at = dt.datetime.utcnow()
+        task.completed_at = dt.datetime.now(dt.timezone.utc)
         
         category = classify_error(str(e))
         error_record = ErrorRecord(

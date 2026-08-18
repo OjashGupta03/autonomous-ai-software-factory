@@ -223,6 +223,11 @@ class ProjectRunner:
 
         terminal = {TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.NEEDS_APPROVAL, TaskStatus.SKIPPED, TaskStatus.BLOCKED}
         while True:
+            # End the current transaction so we can see changes committed by workers
+            await self.db.commit()
+            # Force SQLAlchemy to drop cached task statuses so the next query fetches fresh rows
+            self.db.expire_all()
+            
             tasks = [await task_service.get_task(self.db, tid) for tid in batch_ids]
             if all(t is not None and t.status in terminal for t in tasks):
                 break

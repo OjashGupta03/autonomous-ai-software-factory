@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { getAuthToken } from "@/api/client";
 import type { ProjectEventPayload } from "@/types/api";
 
@@ -12,6 +13,7 @@ const MAX_EVENTS_KEPT = 200;
  * cannot send an Authorization header - see docs/16-frontend.md.
  */
 export function useProjectEvents(projectId: string | undefined) {
+  const queryClient = useQueryClient();
   const [events, setEvents] = useState<ProjectEventPayload[]>([]);
   const [connected, setConnected] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -53,6 +55,11 @@ export function useProjectEvents(projectId: string | undefined) {
             try {
               const parsed = JSON.parse(line.slice("data: ".length)) as ProjectEventPayload;
               setEvents((prev) => [...prev.slice(-(MAX_EVENTS_KEPT - 1)), parsed]);
+              
+              // Instantly invalidate graph and task queries so the UI updates
+              // in real-time without needing to rely on a 4-second poll.
+              queryClient.invalidateQueries({ queryKey: ["projects", projectId, "task-graph"] });
+              queryClient.invalidateQueries({ queryKey: ["projects", projectId, "tasks"] });
             } catch {
               // malformed/partial chunk - skip rather than crash the stream
             }

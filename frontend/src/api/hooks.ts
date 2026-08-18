@@ -60,7 +60,6 @@ export function useTaskGraph(projectId: string | undefined) {
     queryKey: ["projects", projectId, "task-graph"],
     queryFn: () => api.get<TaskGraphResponse>(`/projects/${projectId}/tasks/graph`),
     enabled: Boolean(projectId),
-    refetchInterval: 4_000,
   });
 }
 
@@ -69,7 +68,6 @@ export function useTasks(projectId: string | undefined) {
     queryKey: ["projects", projectId, "tasks"],
     queryFn: () => api.get<TaskRead[]>(`/projects/${projectId}/tasks`),
     enabled: Boolean(projectId),
-    refetchInterval: 5_000,
   });
 }
 
