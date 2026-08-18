@@ -211,9 +211,23 @@ class StubLLMClient(LLMClient):
         self.calls.append(messages)
         if self._responder is not None:
             return self._responder(messages, tools)
+            
         last_user = next((m.content for m in reversed(messages) if m.role == "user"), "")
+        
+        content = f"[stub] acknowledged task context ({len(last_user)} chars)."
+        
+        if "analyze_requirement" in getattr(self, "model_name", "") or "JSON" in last_user:
+            if "Analyze this software requirement" in last_user:
+                content = '{"feasibility": "high", "missing_details": [], "recommended_architecture": "simple script"}'
+            elif "Draft the architecture" in last_user:
+                content = '{"components": [{"name": "calculator", "responsibility": "math"}], "data_models": [], "decisions": []}'
+            elif "Decompose this architecture into a task DAG" in last_user:
+                content = '[{"key": "T1", "title": "Implement addition", "description": "Add things", "task_type": "backend_implementation", "agent_type": "coder", "depends_on": [], "priority": 1, "deterministic_payload": null}, {"key": "T2", "title": "Write tests", "description": "Test things", "task_type": "test_authoring", "agent_type": "tester", "depends_on": ["T1"], "priority": 2, "deterministic_payload": null}]'
+            else:
+                content = "{}"
+
         return LLMResult(
-            content=f"[stub] acknowledged task context ({len(last_user)} chars).",
+            content=content,
             tool_calls=[],
             usage=LLMUsage(input_tokens=len(last_user) // 4, output_tokens=10),
             model=self.model_name,

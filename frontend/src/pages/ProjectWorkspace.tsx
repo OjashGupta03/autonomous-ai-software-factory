@@ -8,12 +8,18 @@ import { TaskDetailPanel } from "@/components/Metrics/TaskDetailPanel";
 import { ApprovalPanel } from "@/components/Approvals/ApprovalPanel";
 import { FileViewer } from "@/components/FileViewer/FileViewer";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { useProjectEvents } from "@/hooks/useProjectEvents";
 import { cn } from "@/lib/utils";
 
 type CenterTab = "graph" | "activity" | "files";
 
 export function ProjectWorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
+  
+  // Keep SSE connection open at the page level so queries invalidate 
+  // even if the Activity feed tab isn't currently active.
+  useProjectEvents(projectId);
+  
   const { data: project } = useProject(projectId);
   const { data: taskGraph } = useTaskGraph(projectId);
   const { data: tasks } = useTasks(projectId);

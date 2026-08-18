@@ -10,16 +10,29 @@ interface User {
 interface AuthState {
   user: User | null;
   isAuthenticating: boolean;
+  isInitialized: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, fullName?: string) => Promise<void>;
   logout: () => void;
+  checkSession: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticating: false,
+  isInitialized: false,
   error: null,
+
+  checkSession: async () => {
+    try {
+      const user = await api.get<User>("/auth/me");
+      set({ user, isInitialized: true });
+    } catch {
+      setAuthToken(null);
+      set({ user: null, isInitialized: true });
+    }
+  },
 
   login: async (email, password) => {
     set({ isAuthenticating: true, error: null });

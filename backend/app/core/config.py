@@ -56,14 +56,14 @@ class Settings(BaseSettings):
     # Model tiers - deliberately separate from "provider" so operators can
     # mix vendors per tier (e.g. a cheap OpenAI model + an Anthropic model
     # for hard reasoning) without touching orchestration code.
-    MODEL_CHEAP: str = "gpt-4o-mini"
-    MODEL_CODING: str = "claude-sonnet-5"
-    MODEL_REASONING: str = "claude-opus-4-8"
-    MODEL_FALLBACK: str = "gpt-4o-mini"
-    MODEL_PROVIDER_CHEAP: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "openai"
+    MODEL_CHEAP: str = "claude-3-5-haiku-20241022"
+    MODEL_CODING: str = "claude-3-5-sonnet-20241022"
+    MODEL_REASONING: str = "claude-3-5-sonnet-20241022"
+    MODEL_FALLBACK: str = "claude-3-5-haiku-20241022"
+    MODEL_PROVIDER_CHEAP: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "anthropic"
     MODEL_PROVIDER_CODING: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "anthropic"
     MODEL_PROVIDER_REASONING: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "anthropic"
-    MODEL_PROVIDER_FALLBACK: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "openai"
+    MODEL_PROVIDER_FALLBACK: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "anthropic"
 
     # --- Context engineering (docs/06-context-engineering.md) ----------
     CONTEXT_BUDGET_PLANNER_TOKENS: int = 8000

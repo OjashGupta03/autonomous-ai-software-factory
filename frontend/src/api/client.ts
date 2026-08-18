@@ -8,10 +8,15 @@ const TOKEN_STORAGE_KEY = "factory_access_token";
 // keeps the auth surface simple; see docs/19-security.md for the
 // tradeoffs (page refresh currently requires re-login - a documented
 // limitation, not an oversight).
-let inMemoryToken: string | null = null;
+let inMemoryToken: string | null = localStorage.getItem(TOKEN_STORAGE_KEY) || null;
 
 export function setAuthToken(token: string | null) {
   inMemoryToken = token;
+  if (token) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  } else {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
 }
 
 export function getAuthToken(): string | null {
