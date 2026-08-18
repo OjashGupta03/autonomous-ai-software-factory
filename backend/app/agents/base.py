@@ -90,7 +90,8 @@ class ToolCallingAgent:
                     hit_iteration_limit=False,
                 )
 
-            messages.append(ChatMessage(role="assistant", content=result.content or ""))
+            tc_dicts = [tc.raw for tc in result.tool_calls]
+            messages.append(ChatMessage(role="assistant", content=result.content or "", tool_calls=tc_dicts, additional_kwargs=result.additional_kwargs, raw_message=getattr(result, "raw_message", None)))
             for tc in result.tool_calls:
                 tool = self._tools_by_name.get(tc.name)
                 if tool is None:

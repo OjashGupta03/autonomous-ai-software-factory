@@ -1,6 +1,6 @@
 import { Handle, Position } from "@xyflow/react";
 import { cn } from "@/lib/utils";
-import type { TaskGraphNode } from "@/types/api";
+
 
 const STATUS_BORDER: Record<string, string> = {
   pending: "border-l-status-pending",

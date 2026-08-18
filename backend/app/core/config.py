@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     # A provider key is only required for the tiers you actually route to.
     OPENAI_API_KEY: str | None = None
     ANTHROPIC_API_KEY: str | None = None
+    GEMINI_API_KEY: str | None = None
+    GROQ_API_KEY: str | None = None
 
     # Model tiers - deliberately separate from "provider" so operators can
     # mix vendors per tier (e.g. a cheap OpenAI model + an Anthropic model
@@ -58,10 +60,10 @@ class Settings(BaseSettings):
     MODEL_CODING: str = "claude-sonnet-5"
     MODEL_REASONING: str = "claude-opus-4-8"
     MODEL_FALLBACK: str = "gpt-4o-mini"
-    MODEL_PROVIDER_CHEAP: Literal["openai", "anthropic", "stub"] = "openai"
-    MODEL_PROVIDER_CODING: Literal["openai", "anthropic", "stub"] = "anthropic"
-    MODEL_PROVIDER_REASONING: Literal["openai", "anthropic", "stub"] = "anthropic"
-    MODEL_PROVIDER_FALLBACK: Literal["openai", "anthropic", "stub"] = "openai"
+    MODEL_PROVIDER_CHEAP: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "openai"
+    MODEL_PROVIDER_CODING: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "anthropic"
+    MODEL_PROVIDER_REASONING: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "anthropic"
+    MODEL_PROVIDER_FALLBACK: Literal["openai", "anthropic", "stub", "gemini", "groq"] = "openai"
 
     # --- Context engineering (docs/06-context-engineering.md) ----------
     CONTEXT_BUDGET_PLANNER_TOKENS: int = 8000

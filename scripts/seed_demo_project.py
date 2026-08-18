@@ -28,7 +28,7 @@ from app.models.user import User  # noqa: E402
 from app.schemas.project import ProjectCreate  # noqa: E402
 from app.services import project_service, task_service  # noqa: E402
 
-DEMO_EMAIL = "demo@factory.local"
+DEMO_EMAIL = "demo@example.com"
 DEMO_PASSWORD = "demo-password-123"
 
 DEMO_REQUIREMENT = (

@@ -49,6 +49,7 @@ class ToolCallRequest:
     id: str
     name: str
     args: dict[str, Any]
+    raw: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -58,6 +59,8 @@ class LLMResult:
     usage: LLMUsage
     model: str
     finish_reason: str = "stop"
+    additional_kwargs: dict[str, Any] = field(default_factory=dict)
+    raw_message: Any = None
 
 
 @dataclass
@@ -66,6 +69,9 @@ class ChatMessage:
     content: str
     tool_call_id: str | None = None
     name: str | None = None
+    tool_calls: list[dict] | None = None
+    additional_kwargs: dict[str, Any] = field(default_factory=dict)
+    raw_message: Any = None
 
 
 class LLMClient(ABC):
@@ -121,7 +127,12 @@ class LangChainClient(LLMClient):
             elif m.role == "user":
                 lc_messages.append(HumanMessage(content=m.content))
             elif m.role == "assistant":
-                lc_messages.append(AIMessage(content=m.content))
+                if getattr(m, "raw_message", None) is not None:
+                    lc_messages.append(m.raw_message)
+                elif m.tool_calls:
+                    lc_messages.append(AIMessage(content=m.content, tool_calls=m.tool_calls, additional_kwargs=m.additional_kwargs))
+                else:
+                    lc_messages.append(AIMessage(content=m.content, additional_kwargs=m.additional_kwargs))
             elif m.role == "tool":
                 lc_messages.append(
                     ToolMessage(content=m.content, tool_call_id=m.tool_call_id or "", name=m.name)
@@ -134,9 +145,17 @@ class LangChainClient(LLMClient):
         model = self._chat_model.bind_tools(tools) if tools else self._chat_model
         response = await model.ainvoke(self._to_lc_messages(messages))
 
-        content = response.content if isinstance(response.content, str) else str(response.content)
+        if isinstance(response.content, str):
+            content = response.content
+        elif isinstance(response.content, list):
+            content = "".join(
+                block.get("text", "") if isinstance(block, dict) else str(block)
+                for block in response.content
+            )
+        else:
+            content = str(response.content)
         tool_calls = [
-            ToolCallRequest(id=tc.get("id", ""), name=tc.get("name", ""), args=tc.get("args", {}) or {})
+            ToolCallRequest(id=tc.get("id", ""), name=tc.get("name", ""), args=tc.get("args", {}) or {}, raw=tc)
             for tc in (getattr(response, "tool_calls", None) or [])
         ]
 
@@ -147,6 +166,8 @@ class LangChainClient(LLMClient):
             usage=usage,
             model=self.model_name,
             finish_reason="tool_calls" if tool_calls else "stop",
+            additional_kwargs=getattr(response, "additional_kwargs", {}),
+            raw_message=response
         )
 
     @staticmethod
@@ -224,6 +245,22 @@ def build_llm_client(routing: RoutingDecision, settings: Settings, model_name: s
             raise RuntimeError("ANTHROPIC_API_KEY is not set but an Anthropic-routed task was requested.")
         chat = ChatAnthropic(model=model_name, api_key=settings.ANTHROPIC_API_KEY, temperature=0.2)
         return LangChainClient(chat, model_name=model_name, provider="anthropic")
+
+    if provider == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        if not settings.GEMINI_API_KEY:
+            raise RuntimeError("GEMINI_API_KEY is not set but a Gemini-routed task was requested.")
+        chat = ChatGoogleGenerativeAI(model=model_name, google_api_key=settings.GEMINI_API_KEY, temperature=0.2)
+        return LangChainClient(chat, model_name=model_name, provider="gemini")
+
+    if provider == "groq":
+        from langchain_groq import ChatGroq
+
+        if not settings.GROQ_API_KEY:
+            raise RuntimeError("GROQ_API_KEY is not set but a Groq-routed task was requested.")
+        chat = ChatGroq(model_name=model_name, groq_api_key=settings.GROQ_API_KEY, temperature=0.2)
+        return LangChainClient(chat, model_name=model_name, provider="groq")
 
     raise ValueError(f"Unknown model provider: {provider}")
 

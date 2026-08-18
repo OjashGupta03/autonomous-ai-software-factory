@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Factory } from "lucide-react";
+import { Navigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/common/Button";
 
@@ -7,7 +8,11 @@ export function LoginPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, register, isAuthenticating, error } = useAuthStore();
+  const { login, register, isAuthenticating, error, user } = useAuthStore();
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

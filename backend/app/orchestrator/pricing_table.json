@@ -5,5 +5,11 @@
   "claude-haiku-4-5-20251001": { "input_per_1k": 0.001, "output_per_1k": 0.005, "provider": "anthropic" },
   "claude-sonnet-5": { "input_per_1k": 0.003, "output_per_1k": 0.015, "provider": "anthropic" },
   "claude-opus-4-8": { "input_per_1k": 0.015, "output_per_1k": 0.075, "provider": "anthropic" },
-  "stub-model": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "stub" }
+  "stub-model": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "stub" },
+  "gemini-1.5-flash": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "gemini" },
+  "gemini-2.0-flash": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "gemini" },
+  "gemini-2.5-flash": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "gemini" },
+  "llama3-70b-8192": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "groq" },
+  "llama-3.1-70b-versatile": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "groq" },
+  "llama-3.3-70b-versatile": { "input_per_1k": 0.0, "output_per_1k": 0.0, "provider": "groq" }
 }
