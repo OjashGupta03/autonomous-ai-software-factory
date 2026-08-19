@@ -28,13 +28,13 @@ redis==5.2.1
 arq==0.26.3
 
 # --- Agent orchestration -------------------------------------------------
-langchain==0.3.14
-langchain-core==0.3.29
-langchain-openai==0.2.14
-langchain-anthropic==0.3.1
-langchain-google-genai
+langchain>=0.3.14
+langchain-core>=0.3.29
+langchain-openai>=0.2.14
+langchain-anthropic>=0.3.1
+langchain-google-genai>=2.0.9
 langchain-groq
-langgraph==0.2.62
+langgraph>=0.2.62
 
 # --- Sandbox --------------------------------------------------------------
 docker==7.1.0

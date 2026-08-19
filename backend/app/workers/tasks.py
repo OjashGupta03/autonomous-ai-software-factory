@@ -87,4 +87,4 @@ class WorkerSettings:
     on_shutdown = _shutdown
     redis_settings = RedisSettings.from_dsn(get_settings().REDIS_URL)
     max_jobs = get_settings().MAX_PARALLEL_TASKS * 2  # headroom over the scheduler's own cap
-    job_timeout = get_settings().SANDBOX_TIMEOUT_SECONDS + 120  # sandbox timeout + LLM/agent overhead
+    job_timeout = 3600  # 1 hour timeout for the orchestrator loop
