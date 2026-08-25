@@ -161,6 +161,8 @@ def is_stalled(tasks: list[TaskNode], running_count: int) -> bool:
     BLOCKED and nothing can make further progress without intervention.
     This is a deadlock signal, not a bug: it means upstream failures have
     and the runner should route to human escalation."""
+    if not tasks:
+        return False
     if is_project_complete(tasks):
         return False
     if running_count > 0:

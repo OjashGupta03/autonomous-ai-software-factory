@@ -21,7 +21,7 @@ services:
       POSTGRES_PASSWORD: factory
       POSTGRES_DB: factory
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -33,7 +33,7 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6381:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -49,7 +49,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://factory:factory@postgres:5432/factory
       REDIS_URL: redis://redis:6379/0
     ports:
-      - "8000:8000"
+      - "8002:8000"
     volumes:
       - ./backend:/app
       - /var/run/docker.sock:/var/run/docker.sock  # sandbox execution needs to launch sibling containers

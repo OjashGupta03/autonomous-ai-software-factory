@@ -18,7 +18,7 @@ from app.tools.db_tools import (
     DirectoryListerTool,
     FileDiffTool,
     FileReaderTool,
-    FileSearchTool,
+    FileSearchTool, FileTreeTool,
     FileWriterTool,
     PackageInspectorTool,
 )
@@ -27,14 +27,14 @@ from app.tools.exec_tools import FormatterTool, LintRunnerTool, ShellCommandRunn
 # Read-only tools every agent gets, regardless of role - inspecting the
 # workspace is never the dangerous part, writing to it or executing
 # something is.
-_READ_ONLY = ("file_reader", "file_search", "directory_lister", "code_search", "file_diff", "package_inspector")
+_READ_ONLY = ("file_reader", "file_search", "directory_lister", "file_tree", "code_search", "file_diff", "package_inspector")
 
 _AGENT_TOOL_NAMES: dict[AgentType, tuple[str, ...]] = {
     AgentType.PLANNER: _READ_ONLY,
-    AgentType.CODER: _READ_ONLY + ("file_writer",),
+    AgentType.CODER: _READ_ONLY + ("file_writer", "shell_command_runner"),
     AgentType.REVIEWER: _READ_ONLY,
     AgentType.DEBUGGER: _READ_ONLY + ("file_writer", "test_runner"),
-    AgentType.TESTER: _READ_ONLY + ("file_writer", "test_runner"),
+    AgentType.TESTER: _READ_ONLY + ("file_writer", "test_runner", "shell_command_runner"),
     AgentType.DOCUMENTER: _READ_ONLY + ("file_writer",),
 }
 
@@ -50,7 +50,7 @@ def build_tools_for_agent(
         "file_reader": FileReaderTool(db, project_id),
         "file_writer": FileWriterTool(db, project_id, created_by_task_id=task_id),
         "file_search": FileSearchTool(db, project_id),
-        "directory_lister": DirectoryListerTool(db, project_id),
+        "directory_lister": DirectoryListerTool(db, project_id), "file_tree": FileTreeTool(db, project_id),
         "code_search": CodeSearchTool(db, project_id),
         "file_diff": FileDiffTool(db, project_id),
         "package_inspector": PackageInspectorTool(db, project_id),

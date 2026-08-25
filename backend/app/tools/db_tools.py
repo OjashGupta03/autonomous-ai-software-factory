@@ -77,6 +77,9 @@ class FileWriterTool(Tool):
 
     async def run(self, path: str, content: str) -> ToolResult:
         with timed() as t:
+            if r"\n" in content and "\n" not in content:
+                content = content.replace(r"\n", "\n").replace(r"\'", "'").replace(r'\"', '"')
+            
             files = await _latest_files(self.db, self.project_id)
             prev = files.get(path)
             next_version = (prev.version + 1) if prev else 1
@@ -259,3 +262,24 @@ class PackageInspectorTool(Tool):
                     else:
                         found[name] = {"lines": [l for l in content.splitlines() if l.strip() and not l.strip().startswith("#")]}
         return ToolResult(success=True, output=found, execution_time_ms=t["elapsed_ms"])
+
+class FileTreeTool(Tool):
+    name = "file_tree"
+    description = "List all file paths. Alias for directory_lister to handle model hallucinations."
+    parameters_schema = {
+        "type": "object",
+        "properties": {
+            "path": {"type": "string"},
+            "depth": {"type": "integer"}
+        },
+    }
+
+    def __init__(self, db: AsyncSession, project_id: uuid.UUID):
+        self.db = db
+        self.project_id = project_id
+
+    async def run(self, path: str = "", depth: int = 0) -> ToolResult:
+        with timed() as t:
+            files = await _latest_files(self.db, self.project_id)
+            matches = sorted(p for p in files if p.startswith(path))
+        return ToolResult(success=True, output={"paths": matches, "count": len(matches)}, execution_time_ms=t["elapsed_ms"])

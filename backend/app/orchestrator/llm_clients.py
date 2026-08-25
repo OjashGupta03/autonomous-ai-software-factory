@@ -142,7 +142,13 @@ class LangChainClient(LLMClient):
     async def acomplete(
         self, messages: list[ChatMessage], tools: list[dict] | None = None
     ) -> LLMResult:
-        model = self._chat_model.bind_tools(tools) if tools else self._chat_model
+        if tools:
+            # NVIDIA NIM API for Llama 3 often rejects parallel tool calls.
+            # We pass parallel_tool_calls=False to ensure it only calls one at a time.
+            model = self._chat_model.bind_tools(tools, parallel_tool_calls=False)
+        else:
+            model = self._chat_model
+            
         response = await model.ainvoke(self._to_lc_messages(messages))
 
         if isinstance(response.content, str):
@@ -249,7 +255,12 @@ def build_llm_client(routing: RoutingDecision, settings: Settings, model_name: s
 
         if not settings.OPENAI_API_KEY:
             raise RuntimeError("OPENAI_API_KEY is not set but an OpenAI-routed task was requested.")
-        chat = ChatOpenAI(model=model_name, api_key=settings.OPENAI_API_KEY, temperature=0.2)
+            
+        kwargs = {}
+        if settings.OPENAI_BASE_URL:
+            kwargs["base_url"] = settings.OPENAI_BASE_URL
+            
+        chat = ChatOpenAI(model=model_name, api_key=settings.OPENAI_API_KEY, temperature=0.2, **kwargs)
         return LangChainClient(chat, model_name=model_name, provider="openai")
 
     if provider == "anthropic":
@@ -273,7 +284,7 @@ def build_llm_client(routing: RoutingDecision, settings: Settings, model_name: s
 
         if not settings.GROQ_API_KEY:
             raise RuntimeError("GROQ_API_KEY is not set but a Groq-routed task was requested.")
-        chat = ChatGroq(model_name=model_name, groq_api_key=settings.GROQ_API_KEY, temperature=0.2)
+        chat = ChatGroq(model_name=model_name, groq_api_key=settings.GROQ_API_KEY, temperature=0.2, max_tokens=4000)
         return LangChainClient(chat, model_name=model_name, provider="groq")
 
     raise ValueError(f"Unknown model provider: {provider}")

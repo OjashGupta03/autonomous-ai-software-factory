@@ -66,3 +66,37 @@ async def start_project(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
     await arq_pool.enqueue_job("run_project_job", str(project_id))
     return {"status": "queued", "project_id": str(project_id)}
+
+import io
+import zipfile
+from fastapi.responses import StreamingResponse
+from sqlalchemy import select
+from app.models.file import File
+
+@router.get("/{project_id}/download")
+async def download_project(
+    project_id: uuid.UUID, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+    project = await project_service.get_project(db, project_id)
+    if project is None or project.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
+        
+    stmt = select(File).filter(File.project_id == project_id).distinct(File.path).order_by(File.path, File.version.desc())
+    result = await db.execute(stmt)
+    files = result.scalars().all()
+    
+    if not files:
+        raise HTTPException(status_code=404, detail="No files found for this project")
+        
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED, False) as zip_file:
+        for f in files:
+            zip_file.writestr(f.path, f.content)
+            
+    zip_buffer.seek(0)
+    
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{project.name}.zip"'}
+    )

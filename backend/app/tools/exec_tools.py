@@ -32,7 +32,7 @@ from app.tools.db_tools import _latest_files
 # deliberately, not reflexively - see docs/19-security.md.
 _SHELL_ALLOWLIST = {
     "ls", "cat", "echo", "pwd", "find", "wc", "grep",
-    "python3", "pip3", "node", "npm", "pytest", "black", "ruff",
+    "python3", "python", "pip3", "pip", "node", "npm", "npx", "pytest", "black", "ruff", "nvm", "mkdir", "touch", "rm", "mv", "cp",
 }
 
 
@@ -223,12 +223,16 @@ class ShellCommandRunnerTool(Tool):
                     network_disabled=self.settings.SANDBOX_NETWORK_DISABLED,
                     image=self.settings.SANDBOX_IMAGE,
                 ))
+            modified: list[str] = []
+            if result.success or True:  # Even on failure, might have created useful scaffolding logs
+                changed = ws.collect()
+                modified = await _write_back(self.db, self.project_id, changed)
         except SandboxUnavailableError as e:
             ws.cleanup()
             return ToolResult(success=False, error=str(e))
         ws.cleanup()
         return ToolResult(
             success=result.success,
-            output={"stdout": result.stdout[-8000:], "exit_code": result.exit_code, "timed_out": result.timed_out},
+            output={"stdout": result.stdout[-8000:], "exit_code": result.exit_code, "timed_out": result.timed_out, "modified_files": modified},
             execution_time_ms=t.elapsed_ms,
         )

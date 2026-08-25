@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Network, Activity, BarChart3 } from "lucide-react";
+import { Network, Activity, BarChart3, Download } from "lucide-react";
 import { useProject, useTaskGraph, useTasks } from "@/api/hooks";
 import { TaskGraphView } from "@/components/TaskGraph/TaskGraphView";
 import { LiveActivityFeed } from "@/components/AgentActivity/LiveActivityFeed";
@@ -41,6 +41,33 @@ export function ProjectWorkspacePage() {
           <BarChart3 size={13} />
           Analytics
         </Link>
+        <button
+          onClick={async () => {
+            try {
+              const token = localStorage.getItem("factory_access_token");
+              const response = await fetch(`/api/v1/projects/${projectId}/download`, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              if (!response.ok) throw new Error("Download failed");
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `${project?.name || "project"}.zip`;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+              a.remove();
+            } catch (e) {
+              console.error(e);
+              alert("Error downloading project.");
+            }
+          }}
+          className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-brass transition-colors ml-2"
+        >
+          <Download size={13} />
+          Download ZIP
+        </button>
       </div>
 
       <div className="flex-1 min-h-0 grid grid-cols-[220px_1fr_320px]">

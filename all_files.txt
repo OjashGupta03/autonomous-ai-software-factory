@@ -1,0 +1,842 @@
+ cli.py              | import argparse                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | def parse_args(args=None):                                                                                                                                                    +
+                     |     """Parse command-line arguments for password generation.                                                                                                                  +
+                     |                                                                                                                                                                               +
+                     |     Args:                                                                                                                                                                     +
+                     |         args: Optional list of argument strings (for testing).                                                                                                                +
+                     |               If None, sys.argv is used.                                                                                                                                      +
+                     |                                                                                                                                                                               +
+                     |     Returns:                                                                                                                                                                  +
+                     |         argparse.Namespace with attributes:                                                                                                                                   +
+                     |             - length (int): Required password length.                                                                                                                         +
+                     |             - special (bool): Whether to include special characters.                                                                                                          +
+                     |             - numbers (bool): Whether to include digits.                                                                                                                      +
+                     |     """                                                                                                                                                                       +
+                     |     parser = argparse.ArgumentParser(                                                                                                                                         +
+                     |         description="Generate a random password."                                                                                                                             +
+                     |     )                                                                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     parser.add_argument(                                                                                                                                                      +
+                     |         "length",                                                                                                                                                             +
+                     |         type=int,                                                                                                                                                             +
+                     |         help="Length of the generated password."                                                                                                                              +
+                     |     )                                                                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     parser.add_argument(                                                                                                                                                      +
+                     |         "--special",                                                                                                                                                          +
+                     |         action="store_true",                                                                                                                                                  +
+                     |         default=False,                                                                                                                                                        +
+                     |         help="Include special characters in the password."                                                                                                                    +
+                     |     )                                                                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     parser.add_argument(                                                                                                                                                      +
+                     |         "--numbers",                                                                                                                                                          +
+                     |         action="store_true",                                                                                                                                                  +
+                     |         default=False,                                                                                                                                                        +
+                     |         help="Include digits in the password."                                                                                                                                +
+                     |     )                                                                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     return parser.parse_args(args)                                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | if __name__ == "__main__":                                                                                                                                                    +
+                     |     args = parse_args()                                                                                                                                                       +
+                     |     print(f"Length: {args.length}")                                                                                                                                           +
+                     |     print(f"Special characters: {args.special}")                                                                                                                              +
+                     |     print(f"Numbers: {args.numbers}")
+ generator.py        | import secrets                                                                                                                                                                +
+                     | import string                                                                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | def generate_password(length=16, include_special=True, include_numbers=True):                                                                                                 +
+                     |     """Generate a cryptographically secure random password.                                                                                                                   +
+                     |                                                                                                                                                                               +
+                     |     Args:                                                                                                                                                                     +
+                     |         length: Password length (1-128). Defaults to 16.                                                                                                                      +
+                     |         include_special: Whether to include special characters. Defaults to True.                                                                                             +
+                     |         include_numbers: Whether to include digits. Defaults to True.                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     Returns:                                                                                                                                                                  +
+                     |         A randomly generated password string.                                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     |     Raises:                                                                                                                                                                   +
+                     |         ValueError: If length is not between 1 and 128.                                                                                                                       +
+                     |         TypeError: If any argument is of an invalid type.                                                                                                                     +
+                     |     """                                                                                                                                                                       +
+                     |     # Validate length type                                                                                                                                                    +
+                     |     if not isinstance(length, int) or isinstance(length, bool):                                                                                                               +
+                     |         raise TypeError("Length must be an integer.")                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     # Validate length bounds                                                                                                                                                  +
+                     |     if length < 1 or length > 128:                                                                                                                                            +
+                     |         raise ValueError("Length must be an integer between 1 and 128.")                                                                                                      +
+                     |                                                                                                                                                                               +
+                     |     # Validate include_special type                                                                                                                                           +
+                     |     if not isinstance(include_special, bool):                                                                                                                                 +
+                     |         raise TypeError("include_special must be a boolean.")                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     |     # Validate include_numbers type                                                                                                                                           +
+                     |     if not isinstance(include_numbers, bool):                                                                                                                                 +
+                     |         raise TypeError("include_numbers must be a boolean.")                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     |     # Base character set: uppercase + lowercase letters                                                                                                                       +
+                     |     characters = string.ascii_uppercase + string.ascii_lowercase                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     # Opt-in additions                                                                                                                                                        +
+                     |     if include_numbers:                                                                                                                                                       +
+                     |         characters += string.digits                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     if include_special:                                                                                                                                                       +
+                     |         characters += string.punctuation                                                                                                                                      +
+                     |                                                                                                                                                                               +
+                     |     return ''.join(secrets.choice(characters) for _ in range(length))
+ test_cli.py         | import pytest                                                                                                                                                                 +
+                     | from cli import parse_args                                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | class TestRequiredLengthArgument:                                                                                                                                             +
+                     |     """Tests for the required 'length' positional argument."""                                                                                                                +
+                     |                                                                                                                                                                               +
+                     |     def test_length_parsed_correctly(self):                                                                                                                                   +
+                     |         args = parse_args(["12"])                                                                                                                                             +
+                     |         assert args.length == 12                                                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     def test_length_zero(self):                                                                                                                                               +
+                     |         args = parse_args(["0"])                                                                                                                                              +
+                     |         assert args.length == 0                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     |     def test_length_large_value(self):                                                                                                                                        +
+                     |         args = parse_args(["100"])                                                                                                                                            +
+                     |         assert args.length == 100                                                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_missing_length_raises_error(self):                                                                                                                               +
+                     |         with pytest.raises(SystemExit):                                                                                                                                       +
+                     |             parse_args([])                                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | class TestOptionalSpecialFlag:                                                                                                                                                +
+                     |     """Tests for the optional '--special' flag."""                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_special_default_false(self):                                                                                                                                     +
+                     |         args = parse_args(["12"])                                                                                                                                             +
+                     |         assert args.special is False                                                                                                                                          +
+                     |                                                                                                                                                                               +
+                     |     def test_special_flag_true(self):                                                                                                                                         +
+                     |         args = parse_args(["12", "--special"])                                                                                                                                +
+                     |         assert args.special is True                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | class TestOptionalNumbersFlag:                                                                                                                                                +
+                     |     """Tests for the optional '--numbers' flag."""                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_numbers_default_false(self):                                                                                                                                     +
+                     |         args = parse_args(["12"])                                                                                                                                             +
+                     |         assert args.numbers is False                                                                                                                                          +
+                     |                                                                                                                                                                               +
+                     |     def test_numbers_flag_true(self):                                                                                                                                         +
+                     |         args = parse_args(["12", "--numbers"])                                                                                                                                +
+                     |         assert args.numbers is True                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | class TestCombinedFlags:                                                                                                                                                      +
+                     |     """Tests for combining multiple flags."""                                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     |     def test_both_flags_true(self):                                                                                                                                           +
+                     |         args = parse_args(["12", "--special", "--numbers"])                                                                                                                   +
+                     |         assert args.length == 12                                                                                                                                              +
+                     |         assert args.special is True                                                                                                                                           +
+                     |         assert args.numbers is True                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_special_only(self):                                                                                                                                              +
+                     |         args = parse_args(["8", "--special"])                                                                                                                                 +
+                     |         assert args.length == 8                                                                                                                                               +
+                     |         assert args.special is True                                                                                                                                           +
+                     |         assert args.numbers is False                                                                                                                                          +
+                     |                                                                                                                                                                               +
+                     |     def test_numbers_only(self):                                                                                                                                              +
+                     |         args = parse_args(["16", "--numbers"])                                                                                                                                +
+                     |         assert args.length == 16                                                                                                                                              +
+                     |         assert args.special is False                                                                                                                                          +
+                     |         assert args.numbers is True                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | class TestErrorHandling:                                                                                                                                                      +
+                     |     """Tests for invalid input handling."""                                                                                                                                   +
+                     |                                                                                                                                                                               +
+                     |     def test_non_integer_length_raises_error(self):                                                                                                                           +
+                     |         with pytest.raises(SystemExit):                                                                                                                                       +
+                     |             parse_args(["abc"])                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     |     def test_float_length_raises_error(self):                                                                                                                                 +
+                     |         with pytest.raises(SystemExit):                                                                                                                                       +
+                     |             parse_args(["12.5"])                                                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     def test_negative_length_accepted_by_parser(self):                                                                                                                        +
+                     |         # argparse with type=int accepts negative numbers                                                                                                                     +
+                     |         args = parse_args(["-5"])                                                                                                                                             +
+                     |         assert args.length == -5                                                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     def test_empty_string_length_raises_error(self):                                                                                                                          +
+                     |         with pytest.raises(SystemExit):                                                                                                                                       +
+                     |             parse_args([""])
+ __main__.py         | from cli import parse_args                                                                                                                                                    +
+                     | from generator import generate_password                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | def main():                                                                                                                                                                   +
+                     |     args = parse_args()                                                                                                                                                       +
+                     |     password = generate_password(                                                                                                                                             +
+                     |         length=args.length,                                                                                                                                                   +
+                     |         include_special=args.special,                                                                                                                                         +
+                     |         include_numbers=args.numbers,                                                                                                                                         +
+                     |     )                                                                                                                                                                         +
+                     |     print(password)                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | if __name__ == "__main__":                                                                                                                                                    +
+                     |     main()
+ test_generator.py   | import pytest                                                                                                                                                                 +
+                     | import string                                                                                                                                                                 +
+                     | from generator import generate_password                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Valid password generation with various lengths                                                                                                                              +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestValidPasswordGeneration:                                                                                                                                            +
+                     |     """Test that passwords are generated correctly for valid inputs."""                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     def test_default_parameters(self):                                                                                                                                        +
+                     |         """Default call should produce a 16-character password."""                                                                                                            +
+                     |         password = generate_password()                                                                                                                                        +
+                     |         assert len(password) == 16                                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_short_length(self):                                                                                                                                              +
+                     |         """A length of 1 should produce a single-character password."""                                                                                                       +
+                     |         password = generate_password(length=1)                                                                                                                                +
+                     |         assert len(password) == 1                                                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_medium_length(self):                                                                                                                                             +
+                     |         """A length of 32 should produce a 32-character password."""                                                                                                          +
+                     |         password = generate_password(length=32)                                                                                                                               +
+                     |         assert len(password) == 32                                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_max_length(self):                                                                                                                                                +
+                     |         """A length of 128 should produce a 128-character password."""                                                                                                        +
+                     |         password = generate_password(length=128)                                                                                                                              +
+                     |         assert len(password) == 128                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_different_calls_produce_different_passwords(self):                                                                                                               +
+                     |         """Two calls with the same arguments should almost certainly differ."""                                                                                               +
+                     |         passwords = {generate_password(length=16) for _ in range(10)}                                                                                                         +
+                     |         # With 94 possible characters and length 16, collision probability is                                                                                                 +
+                     |         # astronomically low; 10 unique passwords is a safe sanity check.                                                                                                     +
+                     |         assert len(passwords) == 10                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Inclusion / exclusion of special characters and numbers                                                                                                                     +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestCharacterInclusion:                                                                                                                                                 +
+                     |     """Test that character sets are correctly included or excluded."""                                                                                                        +
+                     |                                                                                                                                                                               +
+                     |     def test_include_special_true(self):                                                                                                                                      +
+                     |         """When include_special=True, at least one special char should appear."""                                                                                             +
+                     |         # Generate a reasonably long password so the probability of missing                                                                                                   +
+                     |         # a special character is very low.                                                                                                                                    +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=True)                                                                                   +
+                     |         assert any(c in string.punctuation for c in password)                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     |     def test_include_special_false(self):                                                                                                                                     +
+                     |         """When include_special=False, no special characters should appear."""                                                                                                +
+                     |         password = generate_password(length=64, include_special=False, include_numbers=True)                                                                                  +
+                     |         assert not any(c in string.punctuation for c in password)                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_include_numbers_true(self):                                                                                                                                      +
+                     |         """When include_numbers=True, at least one digit should appear."""                                                                                                    +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=True)                                                                                   +
+                     |         assert any(c in string.digits for c in password)                                                                                                                      +
+                     |                                                                                                                                                                               +
+                     |     def test_include_numbers_false(self):                                                                                                                                     +
+                     |         """When include_numbers=False, no digits should appear."""                                                                                                            +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=False)                                                                                  +
+                     |         assert not any(c in string.digits for c in password)                                                                                                                  +
+                     |                                                                                                                                                                               +
+                     |     def test_no_special_no_numbers(self):                                                                                                                                     +
+                     |         """With both flags False, only letters should appear."""                                                                                                              +
+                     |         password = generate_password(length=32, include_special=False, include_numbers=False)                                                                                 +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase)                                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_only_special_no_numbers(self):                                                                                                                                   +
+                     |         """With special=True and numbers=False, no digits but specials allowed."""                                                                                            +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=False)                                                                                  +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.punctuation)                                                                                   +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |         assert not any(c in string.digits for c in password)                                                                                                                  +
+                     |                                                                                                                                                                               +
+                     |     def test_only_numbers_no_special(self):                                                                                                                                   +
+                     |         """With special=False and numbers=True, no specials but digits allowed."""                                                                                            +
+                     |         password = generate_password(length=64, include_special=False, include_numbers=True)                                                                                  +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.digits)                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |         assert not any(c in string.punctuation for c in password)                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Verification that passwords only contain allowed characters                                                                                                                 +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestAllowedCharacters:                                                                                                                                                  +
+                     |     """Ensure generated passwords never contain disallowed characters."""                                                                                                     +
+                     |                                                                                                                                                                               +
+                     |     def test_all_allowed_with_all_options(self):                                                                                                                              +
+                     |         """Full character set: letters + digits + punctuation."""                                                                                                             +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=True)                                                                                   +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.digits + string.punctuation)                                                                   +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_all_allowed_letters_only(self):                                                                                                                                  +
+                     |         """Letters-only mode."""                                                                                                                                              +
+                     |         password = generate_password(length=64, include_special=False, include_numbers=False)                                                                                 +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase)                                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_all_allowed_letters_and_digits(self):                                                                                                                            +
+                     |         """Letters + digits mode."""                                                                                                                                          +
+                     |         password = generate_password(length=64, include_special=False, include_numbers=True)                                                                                  +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.digits)                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_all_allowed_letters_and_special(self):                                                                                                                           +
+                     |         """Letters + special mode."""                                                                                                                                         +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=False)                                                                                  +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.punctuation)                                                                                   +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_no_whitespace(self):                                                                                                                                             +
+                     |         """Passwords should never contain whitespace."""                                                                                                                      +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=True)                                                                                   +
+                     |         assert not any(c.isspace() for c in password)                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     def test_no_control_characters(self):                                                                                                                                     +
+                     |         """Passwords should never contain control characters."""                                                                                                              +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=True)                                                                                   +
+                     |         assert not any(c in string.ascii_letters + string.digits + string.punctuation for c in password if c.isprintable() is False)                                          +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Input validation – out-of-bounds lengths                                                                                                                                    +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestLengthValidation:                                                                                                                                                   +
+                     |     """Test that invalid length values raise appropriate exceptions."""                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     def test_length_zero_raises_value_error(self):                                                                                                                            +
+                     |         with pytest.raises(ValueError, match="Length must be an integer between 1 and 128"):                                                                                  +
+                     |             generate_password(length=0)                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     def test_length_negative_raises_value_error(self):                                                                                                                        +
+                     |         with pytest.raises(ValueError, match="Length must be an integer between 1 and 128"):                                                                                  +
+                     |             generate_password(length=-1)                                                                                                                                      +
+                     |                                                                                                                                                                               +
+                     |     def test_length_129_raises_value_error(self):                                                                                                                             +
+                     |         with pytest.raises(ValueError, match="Length must be an integer between 1 and 128"):                                                                                  +
+                     |             generate_password(length=129)                                                                                                                                     +
+                     |                                                                                                                                                                               +
+                     |     def test_length_large_raises_value_error(self):                                                                                                                           +
+                     |         with pytest.raises(ValueError, match="Length must be an integer between 1 and 128"):                                                                                  +
+                     |             generate_password(length=1000)                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |     def test_length_float_raises_type_error(self):                                                                                                                            +
+                     |         with pytest.raises(TypeError, match="Length must be an integer"):                                                                                                     +
+                     |             generate_password(length=16.5)                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |     def test_length_string_raises_type_error(self):                                                                                                                           +
+                     |         with pytest.raises(TypeError, match="Length must be an integer"):                                                                                                     +
+                     |             generate_password(length="16")                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |     def test_length_none_raises_type_error(self):                                                                                                                             +
+                     |         with pytest.raises(TypeError, match="Length must be an integer"):                                                                                                     +
+                     |             generate_password(length=None)                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |     def test_length_bool_raises_type_error(self):                                                                                                                             +
+                     |         """Booleans are technically ints in Python but should be rejected."""                                                                                                 +
+                     |         with pytest.raises(TypeError, match="Length must be an integer"):                                                                                                     +
+                     |             generate_password(length=True)                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Input validation – boolean flag types                                                                                                                                       +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestFlagValidation:                                                                                                                                                     +
+                     |     """Test that invalid flag values raise appropriate exceptions."""                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     def test_include_special_int_raises_type_error(self):                                                                                                                     +
+                     |         with pytest.raises(TypeError, match="include_special must be a boolean"):                                                                                             +
+                     |             generate_password(length=16, include_special=1)                                                                                                                   +
+                     |                                                                                                                                                                               +
+                     |     def test_include_special_string_raises_type_error(self):                                                                                                                  +
+                     |         with pytest.raises(TypeError, match="include_special must be a boolean"):                                                                                             +
+                     |             generate_password(length=16, include_special="yes")                                                                                                               +
+                     |                                                                                                                                                                               +
+                     |     def test_include_special_none_raises_type_error(self):                                                                                                                    +
+                     |         with pytest.raises(TypeError, match="include_special must be a boolean"):                                                                                             +
+                     |             generate_password(length=16, include_special=None)                                                                                                                +
+                     |                                                                                                                                                                               +
+                     |     def test_include_numbers_int_raises_type_error(self):                                                                                                                     +
+                     |         with pytest.raises(TypeError, match="include_numbers must be a boolean"):                                                                                             +
+                     |             generate_password(length=16, include_numbers=1)                                                                                                                   +
+                     |                                                                                                                                                                               +
+                     |     def test_include_numbers_string_raises_type_error(self):                                                                                                                  +
+                     |         with pytest.raises(TypeError, match="include_numbers must be a boolean"):                                                                                             +
+                     |             generate_password(length=16, include_numbers="yes")                                                                                                               +
+                     |                                                                                                                                                                               +
+                     |     def test_include_numbers_none_raises_type_error(self):                                                                                                                    +
+                     |         with pytest.raises(TypeError, match="include_numbers must be a boolean"):                                                                                             +
+                     |             generate_password(length=16, include_numbers=None)                                                                                                                +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Edge cases                                                                                                                                                                  +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestEdgeCases:                                                                                                                                                          +
+                     |     """Test boundary and corner-case scenarios."""                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_length_one_valid(self):                                                                                                                                          +
+                     |         """Minimum valid length should work."""                                                                                                                               +
+                     |         password = generate_password(length=1)                                                                                                                                +
+                     |         assert len(password) == 1                                                                                                                                             +
+                     |         assert password.isprintable()                                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     def test_length_128_valid(self):                                                                                                                                          +
+                     |         """Maximum valid length should work."""                                                                                                                               +
+                     |         password = generate_password(length=128)                                                                                                                              +
+                     |         assert len(password) == 128                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_length_one_letters_only(self):                                                                                                                                   +
+                     |         """Single character with no extras should be a letter."""                                                                                                             +
+                     |         password = generate_password(length=1, include_special=False, include_numbers=False)                                                                                  +
+                     |         assert password in string.ascii_uppercase + string.ascii_lowercase                                                                                                    +
+                     |                                                                                                                                                                               +
+                     |     def test_contains_uppercase(self):                                                                                                                                        +
+                     |         """A long password with all options should contain uppercase letters."""                                                                                              +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=True)                                                                                   +
+                     |         assert any(c in string.ascii_uppercase for c in password)                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_contains_lowercase(self):                                                                                                                                        +
+                     |         """A long password with all options should contain lowercase letters."""                                                                                              +
+                     |         password = generate_password(length=64, include_special=True, include_numbers=True)                                                                                   +
+                     |         assert any(c in string.ascii_lowercase for c in password)
+ test_integration.py | import string                                                                                                                                                                 +
+                     | import subprocess                                                                                                                                                             +
+                     | import sys                                                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     | import pytest                                                                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | from cli import parse_args                                                                                                                                                    +
+                     | from generator import generate_password                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Integration tests: full flow from CLI args to generator output                                                                                                              +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestCliToGeneratorFlow:                                                                                                                                                 +
+                     |     """End-to-end tests that verify the complete pipeline:                                                                                                                    +
+                     |     CLI arguments → parse_args → generate_password → output.                                                                                                                  +
+                     |     """                                                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     def _run_full_flow(self, cli_args):                                                                                                                                       +
+                     |         """Helper: parse CLI args, generate password, return the result."""                                                                                                   +
+                     |         args = parse_args(cli_args)                                                                                                                                           +
+                     |         password = generate_password(                                                                                                                                         +
+                     |             length=args.length,                                                                                                                                               +
+                     |             include_special=args.special,                                                                                                                                     +
+                     |             include_numbers=args.numbers,                                                                                                                                     +
+                     |         )                                                                                                                                                                     +
+                     |         return password                                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     # -- Basic flow tests ---------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     |     def test_basic_flow_default_flags(self):                                                                                                                                  +
+                     |         """CLI with only length → password of correct length, letters only."""                                                                                                +
+                     |         password = self._run_full_flow(["12"])                                                                                                                                +
+                     |         assert len(password) == 12                                                                                                                                            +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase)                                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_with_special_flag(self):                                                                                                                                    +
+                     |         """CLI with --special → password may contain special characters."""                                                                                                   +
+                     |         password = self._run_full_flow(["32", "--special"])                                                                                                                   +
+                     |         assert len(password) == 32                                                                                                                                            +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.punctuation)                                                                                   +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_with_numbers_flag(self):                                                                                                                                    +
+                     |         """CLI with --numbers → password may contain digits."""                                                                                                               +
+                     |         password = self._run_full_flow(["32", "--numbers"])                                                                                                                   +
+                     |         assert len(password) == 32                                                                                                                                            +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.digits)                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_with_both_flags(self):                                                                                                                                      +
+                     |         """CLI with --special --numbers → full character set."""                                                                                                              +
+                     |         password = self._run_full_flow(["32", "--special", "--numbers"])                                                                                                      +
+                     |         assert len(password) == 32                                                                                                                                            +
+                     |         allowed = set(                                                                                                                                                        +
+                     |             string.ascii_uppercase                                                                                                                                            +
+                     |             + string.ascii_lowercase                                                                                                                                          +
+                     |             + string.digits                                                                                                                                                   +
+                     |             + string.punctuation                                                                                                                                              +
+                     |         )                                                                                                                                                                     +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     # -- Length boundary tests -----------------------------------------------                                                                                                +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_min_length(self):                                                                                                                                           +
+                     |         """CLI with length=1 → single character password."""                                                                                                                  +
+                     |         password = self._run_full_flow(["1"])                                                                                                                                 +
+                     |         assert len(password) == 1                                                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_max_length(self):                                                                                                                                           +
+                     |         """CLI with length=128 → 128 character password."""                                                                                                                   +
+                     |         password = self._run_full_flow(["128"])                                                                                                                               +
+                     |         assert len(password) == 128                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_zero_length_raises(self):                                                                                                                                   +
+                     |         """CLI with length=0 → generator raises ValueError."""                                                                                                                +
+                     |         with pytest.raises(ValueError, match="between 1 and 128"):                                                                                                            +
+                     |             self._run_full_flow(["0"])                                                                                                                                        +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_negative_length_raises(self):                                                                                                                               +
+                     |         """CLI with negative length → generator raises ValueError."""                                                                                                         +
+                     |         with pytest.raises(ValueError, match="between 1 and 128"):                                                                                                            +
+                     |             self._run_full_flow(["-5"])                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_over_max_length_raises(self):                                                                                                                               +
+                     |         """CLI with length=129 → generator raises ValueError."""                                                                                                              +
+                     |         with pytest.raises(ValueError, match="between 1 and 128"):                                                                                                            +
+                     |             self._run_full_flow(["129"])                                                                                                                                      +
+                     |                                                                                                                                                                               +
+                     |     # -- Character set exclusion tests ---------------------------------------                                                                                                +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_no_special_excludes_punctuation(self):                                                                                                                      +
+                     |         """Without --special, password must not contain punctuation."""                                                                                                       +
+                     |         password = self._run_full_flow(["64", "--numbers"])                                                                                                                   +
+                     |         assert not any(c in string.punctuation for c in password)                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_no_numbers_excludes_digits(self):                                                                                                                           +
+                     |         """Without --numbers, password must not contain digits."""                                                                                                            +
+                     |         password = self._run_full_flow(["64", "--special"])                                                                                                                   +
+                     |         assert not any(c in string.digits for c in password)                                                                                                                  +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_neither_flag_letters_only(self):                                                                                                                            +
+                     |         """Without either flag, password must be letters only."""                                                                                                             +
+                     |         password = self._run_full_flow(["64"])                                                                                                                                +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase)                                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     # -- Uniqueness test -----------------------------------------------------                                                                                                +
+                     |                                                                                                                                                                               +
+                     |     def test_flow_produces_different_passwords(self):                                                                                                                         +
+                     |         """Multiple invocations with same args should produce different passwords."""                                                                                         +
+                     |         passwords = {                                                                                                                                                         +
+                     |             self._run_full_flow(["16", "--special", "--numbers"])                                                                                                             +
+                     |             for _ in range(10)                                                                                                                                                +
+                     |         }                                                                                                                                                                     +
+                     |         assert len(passwords) == 10                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Integration tests: __main__.py entry point (stdout capture)                                                                                                                 +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestMainEntryPoint:                                                                                                                                                     +
+                     |     """Tests that verify __main__.main() correctly wires CLI to generator                                                                                                     +
+                     |     and prints the result to stdout.                                                                                                                                          +
+                     |     """                                                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     def _invoke_main(self, cli_args, capsys):                                                                                                                                 +
+                     |         """Helper: temporarily replace sys.argv, call main(), return stdout."""                                                                                               +
+                     |         import __main__ as main_module                                                                                                                                        +
+                     |                                                                                                                                                                               +
+                     |         old_argv = sys.argv                                                                                                                                                   +
+                     |         sys.argv = ["password_gen"] + cli_args                                                                                                                                +
+                     |         try:                                                                                                                                                                  +
+                     |             main_module.main()                                                                                                                                                +
+                     |         finally:                                                                                                                                                              +
+                     |             sys.argv = old_argv                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     |         captured = capsys.readouterr()                                                                                                                                        +
+                     |         return captured.out.strip()                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_main_prints_password(self, capsys):                                                                                                                              +
+                     |         """main() should print a non-empty password to stdout."""                                                                                                             +
+                     |         password = self._invoke_main(["12"], capsys)                                                                                                                          +
+                     |         assert len(password) == 12                                                                                                                                            +
+                     |         assert password.isprintable()                                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     |     def test_main_with_special(self, capsys):                                                                                                                                 +
+                     |         """main() with --special should produce a password that may include punctuation."""                                                                                   +
+                     |         password = self._invoke_main(["32", "--special"], capsys)                                                                                                             +
+                     |         assert len(password) == 32                                                                                                                                            +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.punctuation)                                                                                   +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_main_with_numbers(self, capsys):                                                                                                                                 +
+                     |         """main() with --numbers should produce a password that may include digits."""                                                                                        +
+                     |         password = self._invoke_main(["32", "--numbers"], capsys)                                                                                                             +
+                     |         assert len(password) == 32                                                                                                                                            +
+                     |         allowed = set(string.ascii_uppercase + string.ascii_lowercase + string.digits)                                                                                        +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_main_with_both_flags(self, capsys):                                                                                                                              +
+                     |         """main() with both flags should produce a password from the full set."""                                                                                             +
+                     |         password = self._invoke_main(["32", "--special", "--numbers"], capsys)                                                                                                +
+                     |         assert len(password) == 32                                                                                                                                            +
+                     |         allowed = set(                                                                                                                                                        +
+                     |             string.ascii_uppercase                                                                                                                                            +
+                     |             + string.ascii_lowercase                                                                                                                                          +
+                     |             + string.digits                                                                                                                                                   +
+                     |             + string.punctuation                                                                                                                                              +
+                     |         )                                                                                                                                                                     +
+                     |         assert all(c in allowed for c in password)                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     |     def test_main_min_length(self, capsys):                                                                                                                                   +
+                     |         """main() with length=1 should print a single character."""                                                                                                           +
+                     |         password = self._invoke_main(["1"], capsys)                                                                                                                           +
+                     |         assert len(password) == 1                                                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_main_max_length(self, capsys):                                                                                                                                   +
+                     |         """main() with length=128 should print a 128-character password."""                                                                                                   +
+                     |         password = self._invoke_main(["128"], capsys)                                                                                                                         +
+                     |         assert len(password) == 128                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_main_invalid_length_raises(self, capsys):                                                                                                                        +
+                     |         """main() with length=0 should raise ValueError from generator."""                                                                                                    +
+                     |         with pytest.raises(ValueError, match="between 1 and 128"):                                                                                                            +
+                     |             self._invoke_main(["0"], capsys)                                                                                                                                  +
+                     |                                                                                                                                                                               +
+                     |     def test_main_missing_length_exits(self, capsys):                                                                                                                         +
+                     |         """main() with no arguments should exit with error (argparse)."""                                                                                                     +
+                     |         with pytest.raises(SystemExit):                                                                                                                                       +
+                     |             self._invoke_main([], capsys)                                                                                                                                     +
+                     |                                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     | # Integration tests: subprocess (true end-to-end)                                                                                                                             +
+                     | # ---------------------------------------------------------------------------                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | class TestSubprocessEndToEnd:                                                                                                                                                 +
+                     |     """True end-to-end tests that invoke the application as a subprocess,                                                                                                     +
+                     |     mimicking real user interaction.                                                                                                                                          +
+                     |     """                                                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     |     def _run_subprocess(self, args):                                                                                                                                          +
+                     |         """Run the app as a subprocess and return (stdout, stderr, returncode)."""                                                                                            +
+                     |         result = subprocess.run(                                                                                                                                              +
+                     |             [sys.executable, "-m", "__main__"] + args,                                                                                                                        +
+                     |             capture_output=True,                                                                                                                                              +
+                     |             text=True,                                                                                                                                                        +
+                     |         )                                                                                                                                                                     +
+                     |         return result.stdout.strip(), result.stderr.strip(), result.returncode                                                                                                +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_basic(self):                                                                                                                                          +
+                     |         """Subprocess with length arg should succeed and print a password."""                                                                                                 +
+                     |         stdout, stderr, rc = self._run_subprocess(["12"])                                                                                                                     +
+                     |         assert rc == 0                                                                                                                                                        +
+                     |         assert len(stdout) == 12                                                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_with_special(self):                                                                                                                                   +
+                     |         """Subprocess with --special should succeed."""                                                                                                                       +
+                     |         stdout, stderr, rc = self._run_subprocess(["32", "--special"])                                                                                                        +
+                     |         assert rc == 0                                                                                                                                                        +
+                     |         assert len(stdout) == 32                                                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_with_numbers(self):                                                                                                                                   +
+                     |         """Subprocess with --numbers should succeed."""                                                                                                                       +
+                     |         stdout, stderr, rc = self._run_subprocess(["32", "--numbers"])                                                                                                        +
+                     |         assert rc == 0                                                                                                                                                        +
+                     |         assert len(stdout) == 32                                                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_with_both_flags(self):                                                                                                                                +
+                     |         """Subprocess with both flags should succeed."""                                                                                                                      +
+                     |         stdout, stderr, rc = self._run_subprocess(["32", "--special", "--numbers"])                                                                                           +
+                     |         assert rc == 0                                                                                                                                                        +
+                     |         assert len(stdout) == 32                                                                                                                                              +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_min_length(self):                                                                                                                                     +
+                     |         """Subprocess with length=1 should produce single character."""                                                                                                       +
+                     |         stdout, stderr, rc = self._run_subprocess(["1"])                                                                                                                      +
+                     |         assert rc == 0                                                                                                                                                        +
+                     |         assert len(stdout) == 1                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_max_length(self):                                                                                                                                     +
+                     |         """Subprocess with length=128 should produce 128 characters."""                                                                                                       +
+                     |         stdout, stderr, rc = self._run_subprocess(["128"])                                                                                                                    +
+                     |         assert rc == 0                                                                                                                                                        +
+                     |         assert len(stdout) == 128                                                                                                                                             +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_invalid_length_fails(self):                                                                                                                           +
+                     |         """Subprocess with length=0 should fail (ValueError)."""                                                                                                              +
+                     |         stdout, stderr, rc = self._run_subprocess(["0"])                                                                                                                      +
+                     |         assert rc != 0                                                                                                                                                        +
+                     |         assert "ValueError" in stderr or "length" in stderr.lower()                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_missing_length_fails(self):                                                                                                                           +
+                     |         """Subprocess with no args should fail (argparse error)."""                                                                                                           +
+                     |         stdout, stderr, rc = self._run_subprocess([])                                                                                                                         +
+                     |         assert rc != 0                                                                                                                                                        +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_non_integer_length_fails(self):                                                                                                                       +
+                     |         """Subprocess with non-integer length should fail (argparse error)."""                                                                                                +
+                     |         stdout, stderr, rc = self._run_subprocess(["abc"])                                                                                                                    +
+                     |         assert rc != 0                                                                                                                                                        +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_output_is_printable(self):                                                                                                                            +
+                     |         """Subprocess output should be printable ASCII."""                                                                                                                    +
+                     |         stdout, stderr, rc = self._run_subprocess(["16", "--special", "--numbers"])                                                                                           +
+                     |         assert rc == 0                                                                                                                                                        +
+                     |         assert stdout.isprintable()                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     |     def test_subprocess_different_runs_differ(self):                                                                                                                          +
+                     |         """Two subprocess runs with same args should produce different passwords."""                                                                                          +
+                     |         out1, _, rc1 = self._run_subprocess(["16", "--special", "--numbers"])                                                                                                 +
+                     |         out2, _, rc2 = self._run_subprocess(["16", "--special", "--numbers"])                                                                                                 +
+                     |         assert rc1 == 0 and rc2 == 0                                                                                                                                          +
+                     |         assert out1 != out2
+ README.md           | # Password Generator                                                                                                                                                          +
+                     |                                                                                                                                                                               +
+                     | A lightweight, cryptographically secure password generator for Python. Generates random passwords with configurable length and character sets using Python's `secrets` module.+
+                     |                                                                                                                                                                               +
+                     | ## Features                                                                                                                                                                   +
+                     |                                                                                                                                                                               +
+                     | - **Cryptographically secure** – Uses Python's `secrets` module (not `random`) for unpredictable password generation.                                                         +
+                     | - **Configurable length** – Supports passwords from 1 to 128 characters.                                                                                                      +
+                     | - **Customizable character sets** – Optionally include digits and special characters.                                                                                         +
+                     | - **CLI interface** – Generate passwords directly from the command line.                                                                                                      +
+                     | - **Python API** – Import and use programmatically in your own projects.                                                                                                      +
+                     |                                                                                                                                                                               +
+                     | ## Installation                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | No external dependencies are required. This project runs on **Python 3.6+** using only the standard library.                                                                  +
+                     |                                                                                                                                                                               +
+                     | ```bash                                                                                                                                                                       +
+                     | # Clone the repository                                                                                                                                                        +
+                     | git clone <repository-url>                                                                                                                                                    +
+                     | cd password-generator                                                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     | # That's it! No pip install needed.                                                                                                                                           +
+                     | ```                                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | ## Usage                                                                                                                                                                      +
+                     |                                                                                                                                                                               +
+                     | ### Command-Line Interface                                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     | Generate a password of length 20 with special characters and numbers:                                                                                                         +
+                     |                                                                                                                                                                               +
+                     | ```bash                                                                                                                                                                       +
+                     | python cli.py 20 --special --numbers                                                                                                                                          +
+                     | ```                                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | Generate a password of length 12 with only letters:                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | ```bash                                                                                                                                                                       +
+                     | python cli.py 12                                                                                                                                                              +
+                     | ```                                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | #### CLI Arguments                                                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     | | Argument    | Type    | Required | Default | Description                          |                                                                                         +
+                     | |-------------|---------|----------|---------|--------------------------------------|                                                                                         +
+                     | | `length`    | `int`   | Yes      | –       | Length of the generated password     |                                                                                         +
+                     | | `--special` | `flag`  | No       | `False` | Include special characters           |                                                                                         +
+                     | | `--numbers` | `flag`  | No       | `False` | Include digits                       |                                                                                         +
+                     |                                                                                                                                                                               +
+                     | ### Python API                                                                                                                                                                +
+                     |                                                                                                                                                                               +
+                     | ```python                                                                                                                                                                     +
+                     | from generator import generate_password                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     | # Generate a default 16-character password with special chars and numbers                                                                                                     +
+                     | password = generate_password()                                                                                                                                                +
+                     | print(password)  # e.g. 'kR3#mP9@xL2$vN7q'                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     | # Generate a 24-character password without special characters                                                                                                                 +
+                     | password = generate_password(length=24, include_special=False)                                                                                                                +
+                     | print(password)  # e.g. 'aB3cD4eF5gH6iJ7kL8mN9oP0'                                                                                                                            +
+                     |                                                                                                                                                                               +
+                     | # Generate an 8-character password with only letters                                                                                                                          +
+                     | password = generate_password(length=8, include_special=False, include_numbers=False)                                                                                          +
+                     | print(password)  # e.g. 'aBcDeFgH'                                                                                                                                            +
+                     | ```                                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | ## API Documentation                                                                                                                                                          +
+                     |                                                                                                                                                                               +
+                     | ### `generator` Module                                                                                                                                                        +
+                     |                                                                                                                                                                               +
+                     | #### `generate_password(length=16, include_special=True, include_numbers=True) -> str`                                                                                        +
+                     |                                                                                                                                                                               +
+                     | Generates a cryptographically secure random password.                                                                                                                         +
+                     |                                                                                                                                                                               +
+                     | **Parameters:**                                                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | | Parameter         | Type      | Default | Description                                      |                                                                                +
+                     | |-------------------|-----------|---------|--------------------------------------------------|                                                                                +
+                     | | `length`          | `int`     | `16`    | Password length. Must be between 1 and 128.      |                                                                                +
+                     | | `include_special` | `bool`    | `True`  | Whether to include special characters (`string.punctuation`). |                                                                   +
+                     | | `include_numbers` | `bool`    | `True`  | Whether to include digits (`string.digits`).      |                                                                               +
+                     |                                                                                                                                                                               +
+                     | **Returns:**                                                                                                                                                                  +
+                     |                                                                                                                                                                               +
+                     | - `str` – A randomly generated password string.                                                                                                                               +
+                     |                                                                                                                                                                               +
+                     | **Raises:**                                                                                                                                                                   +
+                     |                                                                                                                                                                               +
+                     | - `ValueError` – If `length` is not between 1 and 128.                                                                                                                        +
+                     | - `TypeError` – If `length` is not an integer, or if `include_special`/`include_numbers` are not booleans.                                                                    +
+                     |                                                                                                                                                                               +
+                     | **Character Sets:**                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | | Set               | Characters Included                          |                                                                                                          +
+                     | |-------------------|----------------------------------------------|                                                                                                          +
+                     | | Always            | Uppercase (`A-Z`) + Lowercase (`a-z`)        |                                                                                                          +
+                     | | `include_numbers` | Digits (`0-9`)                                |                                                                                                         +
+                     | | `include_special` | Punctuation (`!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~`) |                                                                                                      +
+                     |                                                                                                                                                                               +
+                     | **Examples:**                                                                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | ```python                                                                                                                                                                     +
+                     | from generator import generate_password                                                                                                                                       +
+                     |                                                                                                                                                                               +
+                     | # Default usage                                                                                                                                                               +
+                     | pw = generate_password()                                                                                                                                                      +
+                     | # length=16, includes letters, digits, and special characters                                                                                                                 +
+                     |                                                                                                                                                                               +
+                     | # Short password, letters only                                                                                                                                                +
+                     | pw = generate_password(length=8, include_special=False, include_numbers=False)                                                                                                +
+                     |                                                                                                                                                                               +
+                     | # Long password with all character types                                                                                                                                      +
+                     | pw = generate_password(length=64, include_special=True, include_numbers=True)                                                                                                 +
+                     | ```                                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | ## Testing                                                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     | Run the test suite with `pytest`:                                                                                                                                             +
+                     |                                                                                                                                                                               +
+                     | ```bash                                                                                                                                                                       +
+                     | pip install pytest                                                                                                                                                            +
+                     | pytest                                                                                                                                                                        +
+                     | ```                                                                                                                                                                           +
+                     |                                                                                                                                                                               +
+                     | ## License                                                                                                                                                                    +
+                     |                                                                                                                                                                               +
+                     | This project is provided as-is. Feel free to use and modify as needed.
+

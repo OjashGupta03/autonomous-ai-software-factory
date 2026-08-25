@@ -45,7 +45,8 @@ async def run_integration_tests(db: AsyncSession, project_id: uuid.UUID, setting
         # 3. Execute tests
         executor = DockerSandboxExecutor(settings)
         request = SandboxExecutionRequest(
-            command=["pytest", "--no-header", "-v"],
+            command=["bash", "-c", "if [ -f requirements.txt ]; then pip install -r requirements.txt; fi; if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi; python -m pytest --no-header -v"],
+            network_disabled=False,
             workspace_dir=workspace_dir,
             timeout_seconds=settings.SANDBOX_TIMEOUT_SECONDS,
         )

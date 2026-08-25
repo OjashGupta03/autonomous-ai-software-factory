@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Habit Management Schemas",
+  "type": "object",
+  "definitions": {
+    "HabitDefinition": {
+      "type": "object",
+      "required": ["id", "name", "frequency", "startDate", "createdAt", "updatedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for the habit."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human‑readable name of the habit."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional longer description of the habit.",
+          "default": ""
+        },
+        "frequency": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly"],
+          "description": "How often the habit is expected to be performed."
+        },
+        "targetCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of times the habit should be performed within the frequency period.",
+          "default": 1
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when the habit tracking begins."
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Optional date when the habit tracking ends.",
+          "nullable": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the habit was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last update to the habit."
+        }
+      },
+      "additionalProperties": false
+    },
+    "DailyProgressRecord": {
+      "type": "object",
+      "required": ["habitId", "date", "count", "createdAt", "updatedAt"],
+      "properties": {
+        "habitId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Reference to the associated HabitDefinition id."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The calendar day this record pertains to."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many times the habit was performed on this day."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional free‑form notes about the day's progress.",
+          "default": ""
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the progress record was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last modification to the record."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

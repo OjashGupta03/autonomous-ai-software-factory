@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     # --- Model providers (see app/orchestrator/model_router.py) --------
     # A provider key is only required for the tiers you actually route to.
     OPENAI_API_KEY: str | None = None
+    OPENAI_BASE_URL: str | None = None
     ANTHROPIC_API_KEY: str | None = None
     GEMINI_API_KEY: str | None = None
     GROQ_API_KEY: str | None = None
@@ -91,7 +92,7 @@ class Settings(BaseSettings):
     SANDBOX_TIMEOUT_SECONDS: int = 60
     SANDBOX_MEMORY_LIMIT: str = "512m"
     SANDBOX_CPU_LIMIT: float = 1.0
-    SANDBOX_NETWORK_DISABLED: bool = True
+    SANDBOX_NETWORK_DISABLED: bool = False
     WORKSPACE_ROOT: str = "/tmp/factory-workspaces"
 
     # --- Pricing table path (see app/orchestrator/pricing.py) ----------

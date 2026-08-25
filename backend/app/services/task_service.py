@@ -35,7 +35,15 @@ async def create_tasks_from_plan(
         key_to_uuid[t["key"]] = task_id
         
         agent_type_str = t.get("agent_type")
-        agent_type = AgentType(agent_type_str) if agent_type_str else None
+        try:
+            agent_type = AgentType(agent_type_str) if agent_type_str else None
+        except ValueError:
+            agent_type = AgentType.CODER
+            
+        try:
+            task_type = TaskType(t["task_type"])
+        except ValueError:
+            task_type = TaskType.BACKEND_IMPLEMENTATION
         
         task = Task(
             id=task_id,
@@ -43,7 +51,7 @@ async def create_tasks_from_plan(
             plan_id=plan_id,
             title=t["title"],
             description=t["description"],
-            task_type=TaskType(t["task_type"]),
+            task_type=task_type,
             assigned_agent_type=agent_type,
             priority=t.get("priority", 0),
             deterministic_payload=t.get("deterministic_payload"),

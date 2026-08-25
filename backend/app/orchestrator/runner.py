@@ -42,8 +42,25 @@ EnqueueFn = Callable[[uuid.UUID], Awaitable[None]]
 
 
 def _strip_json_fences(text: str) -> str:
-    match = re.search(r"```(?:json)?\s*(.*?)```", text, re.DOTALL)
-    return match.group(1).strip() if match else text.strip()
+    import re
+    match = re.search(r"```(?:json)?\s*(.*?)(?:```|$)", text, re.DOTALL)
+    text = match.group(1) if match else text
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    text = text.strip()
+    
+    start_idx, end_idx = -1, -1
+    for i, c in enumerate(text):
+        if c in '{[':
+            start_idx = i
+            break
+    for i in range(len(text)-1, -1, -1):
+        if text[i] in '}]':
+            end_idx = i
+            break
+            
+    if start_idx != -1 and end_idx != -1 and end_idx >= start_idx:
+        return text[start_idx:end_idx+1]
+    return text
 
 
 class PlannerOutputError(ValueError):
@@ -83,11 +100,19 @@ class ProjectRunner:
         return result.final_content or ""
 
     async def _run_planner_json_call(self, kind: str, prompt: str) -> Any:
-        raw = await self._run_planner_call(kind, prompt)
-        try:
-            return json.loads(_strip_json_fences(raw))
-        except json.JSONDecodeError as e:
-            raise PlannerOutputError(f"Planner ({kind}) did not return valid JSON: {e}\nRaw: {raw[:500]}") from e
+        last_err = None
+        # Add a JSON formatting instruction to the prompt to help the model
+        prompt += "\n\nCRITICAL: You MUST respond ONLY with valid JSON. Do not include markdown code blocks, do not include trailing commas, and ensure all properties are properly quoted."
+        for attempt in range(3):
+            raw = await self._run_planner_call(kind, prompt)
+            try:
+                return json.loads(_strip_json_fences(raw))
+            except json.JSONDecodeError as e:
+                last_err = e
+                # Feed the error back to the model so it can fix it
+                prompt += f"\n\nERROR on last attempt: {e}\nRaw output was: {_strip_json_fences(raw)[:500]}...\nPlease fix the JSON syntax error and try again."
+        
+        raise PlannerOutputError(f"Planner ({kind}) did not return valid JSON after 3 attempts: {last_err}") from last_err
 
     # -- graph nodes ----------------------------------------------------
 
@@ -100,7 +125,7 @@ class ProjectRunner:
             "Analyze this software requirement. Respond with ONLY a JSON object: "
             '{"goals": [...], "constraints": [...], "assumptions": [...]}.\n\n'
             f"Requirement:\n{requirement.raw_text if requirement else '(none provided)'}\n\n"
-            f"Explicit constraints: {json.dumps(requirement.constraints) if requirement and requirement.constraints else '{}'}"
+            f"Explicit constraints: {json.dumps(requirement.constraints) if requirement and requirement.constraints else '{}'}\n\nCRITICAL: DO NOT use any tool calls or function calls. Output ONLY raw JSON text."
         )
         analysis = await self._run_planner_json_call("requirement_analysis", prompt)
 
@@ -128,7 +153,7 @@ class ProjectRunner:
         analysis_artifact = result.scalars().first()
 
         prompt = (
-            "Based on this requirement analysis, propose a concise architecture. Respond with ONLY a JSON object: "
+            "Based on this requirement analysis, propose a concise architecture. Respond with ONLY a JSON object (CRITICAL: DO NOT use any tool calls or function calls. Output ONLY raw JSON text): "
             '{"architecture_summary": "...", "tech_stack": {...}, "milestones": ["..."]}.\n\n'
             f"Requirement analysis:\n{analysis_artifact.content_ref if analysis_artifact else '(none)'}"
         )
@@ -157,7 +182,7 @@ class ProjectRunner:
         plan = plan_result.scalars().first()
 
         prompt = (
-            "Decompose this architecture into a task DAG. Respond with ONLY a JSON array of objects, each: "
+            "Decompose this architecture into a task DAG. Respond with ONLY a JSON array of objects (CRITICAL: DO NOT use any tool calls or function calls. Output ONLY raw JSON text), each: "
             '{"key": "T1", "title": "...", "description": "...", '
             '"task_type": one of [scaffold, install_dependencies, format_lint, schema_design, '
             "backend_implementation, frontend_implementation, integration, test_authoring, bugfix, "
@@ -394,7 +419,8 @@ class ProjectRunner:
         from app.orchestrator.graph import build_resume_graph
 
         plan_id = await self._active_plan_id()
-        if plan_id is None:
+        tasks = await task_service.to_scheduler_nodes(self.db, self.project_id)
+        if plan_id is None or not tasks:
             return await self.run()
 
         app = build_resume_graph(self)
