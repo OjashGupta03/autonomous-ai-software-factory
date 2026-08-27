@@ -36,11 +36,25 @@ async def decide_approval(
     if decision.decision in (ApprovalStatus.APPROVED, ApprovalStatus.MODIFIED) and approval.task_id is not None:
         from app.services import task_service
 
-        await task_service.reset_for_retry(db, approval.task_id, escalate_to_debugger=False)
+        # FIX: `decision.modified_instruction` (and `.note`, as a
+        # fallback) used to be accepted by this endpoint and then never
+        # passed anywhere - reset_for_retry didn't take it, and the next
+        # execution of the task always re-ran task.description verbatim.
+        # docs/13-human-in-the-loop.md documents "modified" as covering
+        # 'retry with a modified instruction' via the note field "which
+        # becomes part of the task's context on the next attempt" - this
+        # now actually makes that true. Only threaded through on an
+        # explicit MODIFIED decision, so a plain "approve and retry"
+        # keeps behaving exactly as before.
+        instruction_override = None
+        if decision.decision == ApprovalStatus.MODIFIED:
+            instruction_override = decision.modified_instruction or decision.note
+
+        await task_service.reset_for_retry(
+            db, approval.task_id, escalate_to_debugger=False, instruction_override=instruction_override,
+        )
 
     if decision.decision in (ApprovalStatus.APPROVED, ApprovalStatus.MODIFIED):
-        # Resume the orchestrator loop - it will pick up wherever the
-        # scheduler finds work next (see ProjectRunner.run_or_resume).
         await arq_pool.enqueue_job("run_project_job", str(project_id))
 
     return approval
