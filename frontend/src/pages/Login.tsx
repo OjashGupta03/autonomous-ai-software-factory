@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Factory } from "lucide-react";
+import { Compass } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/common/Button";
@@ -27,8 +27,8 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-base px-4">
       <div className="w-full max-w-sm">
         <div className="flex items-center gap-2 justify-center mb-8">
-          <Factory size={28} className="text-brass" strokeWidth={2} />
-          <span className="font-display text-xl font-semibold text-text-primary">Software Factory</span>
+          <Compass size={28} className="text-brass" strokeWidth={2} />
+          <span className="font-display text-xl font-semibold text-text-primary">Daedalus</span>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-md p-6 flex flex-col gap-4">

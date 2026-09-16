@@ -11,7 +11,7 @@ or inside the backend/worker application containers.
 ## What the sandbox actually does
 
 For every execution request (`SandboxExecutionRequest`): launches a container from the
-`factory-sandbox:latest` image (`docker/sandbox.Dockerfile`) with:
+`daedalus-sandbox:latest` image (`docker/sandbox.Dockerfile`) with:
 
 - `network_mode="none"` by default (`SANDBOX_NETWORK_DISABLED=true`) - generated code
   cannot make outbound network calls unless an operator deliberately re-enables it.

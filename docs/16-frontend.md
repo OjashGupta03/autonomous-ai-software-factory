@@ -1,6 +1,6 @@
 # 16 - Frontend
 
-## Design system: "Factory Floor"
+## Design system: "Daedalus"
 
 Deliberately not a generic SaaS admin-dashboard theme. The product is about watching
 autonomous agents work, so the visual language borrows from control-room / instrument-

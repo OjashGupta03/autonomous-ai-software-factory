@@ -1,4 +1,4 @@
-# Autonomous AI Software Factory
+# Daedalus
 
 An agentic platform that takes a natural-language software requirement and autonomously
 plans, decomposes, implements, tests, debugs, and integrates it - while treating "how
@@ -62,7 +62,7 @@ a compromise.
 cp .env.example .env
 # edit .env - add an OpenAI/Anthropic key, or leave MODEL_PROVIDER_*=stub for a $0 dry run
 
-docker build -f docker/sandbox.Dockerfile -t factory-sandbox:latest .
+docker build -f docker/sandbox.Dockerfile -t daedalus-sandbox:latest .
 docker compose up --build
 ```
 

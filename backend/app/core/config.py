@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
-    APP_NAME: str = "Autonomous AI Software Factory"
+    APP_NAME: str = "Daedalus"
     API_V1_PREFIX: str = "/api/v1"
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = False
@@ -69,12 +69,12 @@ class Settings(BaseSettings):
     HIGH_COST_ESCALATION_USD: float = 1.00
 
     SANDBOX_ENABLED: bool = True
-    SANDBOX_IMAGE: str = "factory-sandbox:latest"
+    SANDBOX_IMAGE: str = "daedalus-sandbox:latest"
     SANDBOX_TIMEOUT_SECONDS: int = 60
     SANDBOX_MEMORY_LIMIT: str = "512m"
     SANDBOX_CPU_LIMIT: float = 1.0
     SANDBOX_NETWORK_DISABLED: bool = True
-    WORKSPACE_ROOT: str = "/tmp/factory-workspaces"
+    WORKSPACE_ROOT: str = "/tmp/daedalus-workspaces"
 
     PRICING_TABLE_PATH: str = "app/orchestrator/pricing_table.json"
 

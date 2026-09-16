@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-// "Factory Floor" design system - a dark control-room aesthetic for
+// "Daedalus" design system - a dark control-room aesthetic for
 // watching autonomous agents work, deliberately not a generic SaaS
 // admin-dashboard palette. See docs/16-frontend.md for the full rationale.
 export default {

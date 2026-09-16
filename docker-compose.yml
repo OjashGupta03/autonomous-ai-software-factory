@@ -53,7 +53,7 @@ services:
     volumes:
       - ./backend:/app
       - /var/run/docker.sock:/var/run/docker.sock  # sandbox execution needs to launch sibling containers
-      - /tmp/factory-workspaces:/tmp/factory-workspaces
+      - /tmp/daedalus-workspaces:/tmp/daedalus-workspaces
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,7 +75,7 @@ services:
     volumes:
       - ./backend:/app
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/factory-workspaces:/tmp/factory-workspaces
+      - /tmp/daedalus-workspaces:/tmp/daedalus-workspaces
     depends_on:
       postgres:
         condition: service_healthy

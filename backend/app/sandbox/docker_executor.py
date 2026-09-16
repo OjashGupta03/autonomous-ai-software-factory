@@ -4,7 +4,7 @@ Sandboxed code execution (docs/11-code-execution-sandbox.md).
 Generated code is NEVER executed directly on the host or inside the
 backend/worker containers. Every test run, lint pass, formatter
 invocation, or shell command runs inside a short-lived, resource-limited
-Docker container built from the `factory-sandbox` image (docker/sandbox.Dockerfile),
+Docker container built from the `daedalus-sandbox` image (docker/sandbox.Dockerfile),
 with:
   - no network access (network_mode="none") unless explicitly re-enabled
     per deployment, which is NOT done by default
@@ -51,7 +51,7 @@ class SandboxExecutionRequest:
     memory_limit: str = "512m"
     cpu_limit: float = 1.0
     network_disabled: bool = True
-    image: str = "factory-sandbox:latest"
+    image: str = "daedalus-sandbox:latest"
     env: dict[str, str] = field(default_factory=dict)
 
 

@@ -2,7 +2,7 @@
 #
 # This image is intentionally NOT part of docker-compose's long-running
 # services - the backend/worker build it once (`docker build -f
-# docker/sandbox.Dockerfile -t factory-sandbox:latest .`) and then the
+# docker/sandbox.Dockerfile -t daedalus-sandbox:latest .`) and then the
 # Docker SDK (app/sandbox/docker_executor.py) launches short-lived,
 # resource-limited containers from it on demand, one per tool call that
 # needs to actually execute something (tests, lint, format, shell).

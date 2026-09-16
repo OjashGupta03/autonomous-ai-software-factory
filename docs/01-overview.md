@@ -2,7 +2,7 @@
 
 ## What this is
 
-The Autonomous AI Software Factory takes a natural-language software requirement and
+Daedalus takes a natural-language software requirement and
 autonomously plans, decomposes, implements, tests, debugs, and integrates it - while
 treating "how much intelligence does this step actually need" as a first-class design
 question, not an afterthought.

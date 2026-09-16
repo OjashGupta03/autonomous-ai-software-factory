@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Factory, LayoutDashboard, LogOut } from "lucide-react";
+import { Compass, LayoutDashboard, LogOut } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
 
@@ -11,8 +11,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-base flex flex-col">
       <header className="h-14 border-b border-border bg-surface flex items-center px-4 gap-6 shrink-0">
         <Link to="/" className="flex items-center gap-2 font-display font-semibold text-text-primary tracking-tight">
-          <Factory size={20} className="text-brass" strokeWidth={2} />
-          <span>Software Factory</span>
+          <Compass size={20} className="text-brass" strokeWidth={2} />
+          <span>Daedalus</span>
         </Link>
         <nav className="flex items-center gap-1 text-sm">
           <NavLink to="/" active={location.pathname === "/"}>

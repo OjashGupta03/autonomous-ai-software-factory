@@ -26,7 +26,7 @@ something.
 
 Check, in order: (1) is the Docker daemon reachable from the backend/worker container -
 `docker-compose.yml` mounts `/var/run/docker.sock` for exactly this; (2) has
-`docker build -f docker/sandbox.Dockerfile -t factory-sandbox:latest .` actually been run
+`docker build -f docker/sandbox.Dockerfile -t daedalus-sandbox:latest .` actually been run
 - the image is not built automatically by `docker compose up`; (3) does the host user
 running Docker have permission to use that socket. See
 [11-code-execution-sandbox.md](11-code-execution-sandbox.md) - this code path could not be

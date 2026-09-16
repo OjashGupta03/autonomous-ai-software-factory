@@ -13,7 +13,7 @@ cp .env.example .env
 # edit .env: set OPENAI_API_KEY and/or ANTHROPIC_API_KEY, or leave the
 # MODEL_PROVIDER_* vars as "stub" for a zero-cost dry run
 
-docker build -f docker/sandbox.Dockerfile -t factory-sandbox:latest .
+docker build -f docker/sandbox.Dockerfile -t daedalus-sandbox:latest .
 
 docker compose up --build
 ```
